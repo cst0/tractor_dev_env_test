@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="namespace" default="/"/>
+  <include file="$(find tractor_vehicle_description)/launch/tractor_description.launch">
+  </include>
+
+  <group ns="$(arg namespace)">
+    <!-- Create the world. -->
+      <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
+    <!-- Spawn the vehicle. -->
+    <node name="spawn_vehicle" pkg="gazebo_ros" type="spawn_model"
+        args="-urdf -param robot_description -model ackermann_vehicle"/>
+
+    <node name="controller_spawner" pkg="controller_manager" type="spawner"
+        args="$(find tractor_gazebo)/config/tractor_joint_params.yaml"/>
+
+    <node name="cmd_vel_to_ackermann" pkg="ackermann_utilities" type="cmd_vel_to_ackermann_drive.py"/>
+
+    <node name="ackermann_controller" pkg="tractor_gazebo" type="ackermann_controller">
+      <rosparam file="$(find tractor_gazebo)/config/tractor_control_params.yaml" command="load"/>
+    </node>
+  </group>
+</launch>
